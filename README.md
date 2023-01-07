@@ -1,6 +1,5 @@
-# buildspace 
-### Welcome 👋
-This is the starter template for the [build your own AI writing assistant w/ GPT-3](https://buildspace.so/builds/ai-writer) project. 
+# Dream Vacation Generator Extension
 
-### **Questions?**
-Have some questions make sure you head over to your [buildspace Dashboard](https://buildspace.so/p/build-ai-writing-assistant-gpt3) and link your Discord account so you can get access to helpful channels and your instructor!
+### Highlight a destination in your browser and a full vacation will be generated for you.
+Your generated vacation will include the cruise and flight average cost and provide you with 8 activity suggestions. The destination will be described and you'll see all of the popular locations, places the locals love, and the best time to travel.
+
