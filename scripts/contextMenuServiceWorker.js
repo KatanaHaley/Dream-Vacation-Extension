@@ -8,8 +8,24 @@ const getKey = () => {
       });
     });
   };
+
+  const sendMessage = (content) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const activeTab = tabs[0].id;
   
-const generate = async (prompt) => {
+      chrome.tabs.sendMessage(
+        activeTab,
+        { message: 'inject', content },
+        (response) => {
+          if (response.status === 'failed') {
+            console.log('injection failed.');
+          }
+        }
+      );
+    });
+  };
+
+  const generate = async (prompt) => {
     // Get your API key from storage
     const key = await getKey();
     const url = 'https://api.openai.com/v1/completions';
@@ -34,22 +50,41 @@ const generate = async (prompt) => {
     return completion.choices.pop();
   }
 
-const generateCompletionAction = async (info) => {
+  const generateCompletionAction = async (info) => {
     try {
+      // Send mesage with generating text (this will be like a loading indicator)
+      sendMessage('generating...');
+  
       const { selectionText } = info;
       const basePromptPrefix = `
-      Write a detailed dream vacation with a creative introduction paragraph. Exclude the word introduction. The vacation should contain 8 activities that most tourists don't know about to the destination below and describe the activity in detail and offer specifics about the flight months that cost the least along with the average price and cruise months that cost the least along with the average price. Suggest companies that offer all-inclusive packages to the destination. Include a separate list of popular tourist locations and vacation secrets in bullet points.
-      
-      Destination: 
-      Popular tourist locations: Offer the most popular locations that tourists visit
-      Vacation secrets: Suggest locations that are well-loved by locals for years and that many people don't know about.\n
-      `;
-      const baseCompletion = await generate(`${basePromptPrefix}${selectionText}`);
-
-      // Let's see what we get!
-      console.log(baseCompletion.text)
+        Write me a detailed table of contents for a blog post with the title below.
+        
+        Title:
+        `;
+  
+        const baseCompletion = await generate(
+          `${basePromptPrefix}${selectionText}`
+        );
+        
+        const secondPrompt = `
+          Take the table of contents and title of the blog post below and generate a blog post written in thwe style of Paul Graham. Make it feel like a story. Don't just list the points. Go deep into each one. Explain why.
+          
+          Title: ${selectionText}
+          
+          Table of Contents: ${baseCompletion.text}
+          
+          Blog Post:
+            `;
+        
+        const secondPromptCompletion = await generate(secondPrompt);
+        
+        // Send the output when we're all done
+        sendMessage(secondPromptCompletion.text);
     } catch (error) {
       console.log(error);
+  
+      // Add this here as well to see if we run into any errors!
+      sendMessage(error.toString());
     }
   };
 
